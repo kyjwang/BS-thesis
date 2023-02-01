@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/css/bootstrap-select.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/js/bootstrap-select.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <title>InterVision</title>
+</head>
+<style>
+    .container {
+        position: relative;
+        width: 50%;
+    }
+
+    .image {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100%;
+        width: 100%;
+        opacity: 0;
+        transition: .5s ease;
+        background-color: #e7e9ec;
+    }
+
+    .container:hover .overlay {
+        opacity: 1;
+    }
+
+    .text {
+        color: #adb1b8;
+        font-size: 20px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+</style>
+<body>
+<header>
+    <H1 style="padding-left: 43%;">InterVision</H1>
+</header>
+<div class="container">
+    <img class="image" src="/static/Untitled.png" alt="named"/>
+    <div class="overlay">
+        <div class="text">InterVision is a tool developed by Arsineh Boodaghian Asl to help policymakers visualize their
+            interventions collaboratively by uploading their complex network.
+        </div>
+    </div>
+</div>
+<div class="browsing">
+    <form action="/" method="post">
+        <label for="network">Select the network:</label>
+        <div class="mytooltip">&#63;
+            <span class="tooltiptext">To do, upload an excel or csv file where the first column encompasses nodes list with outgoing links, the second column encompasses nodes list with incoming link from the first column, and the third column represents the corresponding link's weight.</span>
+        </div>
+        <input id="network" type="file" name="network_info"
+               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"><br>
+        <label for="category">Select the categories:</label>
+        <div class="mytooltip">&#63;
+            <span class="tooltiptext">To do, upload an excel or csv file where the first column encompasses all the nodes list, and the second column represents the corresponding node category.</span>
+        </div>
+        <input id="category" type="file" name="category_info"
+               accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"><br>
+        <input type="submit">
+    </form>
+</div>
+</body>
+</html>

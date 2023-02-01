@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="/static/styles/style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/css/bootstrap-select.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/js/bootstrap-select.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>InterVision</title>
+    <style type="text/css">
+        .wrapping {
+        }
+
+        .network {
+            float: left;
+            width: 71%;
+            display: inline-block !important;
+            margin-left: 3px;
+        }
+
+        .options {
+            width: 25%;
+            float: right;
+            display: inline-block;
+        }
+
+        button {
+            margin-top: 1px;
+            background-image: linear-gradient(#f7f8fa, #e7e9ec);
+            border-color: #adb1b8 #a2a6ac #8d9096;
+            border-style: solid;
+            border-width: 1px;
+            border-radius: 3px;
+            box-shadow: rgba(255, 255, 255, .6) 0 1px 0 inset;
+            box-sizing: border-box;
+            color: #0f1111;
+            cursor: pointer;
+            display: inline-block;
+            font-family: "Amazon Ember", Arial, sans-serif;
+            font-size: 14px;
+            height: 29px;
+            outline: 0;
+            overflow: hidden;
+            text-align: center;
+            text-decoration: none;
+            text-overflow: ellipsis;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            white-space: nowrap;
+            width: 91%;
+        }
+
+        button:active {
+            border-bottom-color: #a2a6ac;
+        }
+
+        button:active:hover {
+            border-bottom-color: #a2a6ac;
+        }
+
+        button:hover {
+            border-color: #a2a6ac #979aa1 #82858a;
+        }
+
+        .nodes {
+            width: 92%;
+        }
+
+        .policy {
+            width: 92%;
+            margin-bottom: 5px;
+        }
+
+        table, th, td {
+            border: 1px solid white;
+        }
+
+        table {
+            margin-left: 2px;
+        }
+
+        .circledgreen {
+            height: 20px;
+            width: 20px;
+            background-color: #009933;
+            border-radius: 50%;
+            display: inline-block;
+            position: center;
+            margin-right: 1px;
+        }
+
+        .circlelgreen {
+            height: 20px;
+            width: 20px;
+            background-color: #99cc00;
+            border-radius: 50%;
+            display: inline-block;
+            position: center;
+            margin-right: 1px;
+        }
+
+        .circledblue {
+            height: 20px;
+            width: 20px;
+            background-color: #0033cc;
+            border-radius: 50%;
+            display: inline-block;
+            position: center;
+            margin-right: 1px;
+        }
+
+        .circlelblue {
+            height: 20px;
+            width: 20px;
+            background-color: #99ccff;
+            border-radius: 50%;
+            display: inline-block;
+            position: center;
+            margin-right: 1px;
+        }
+
+        .circlepink {
+            height: 20px;
+            width: 20px;
+            background-color: #ff6699;
+            border-radius: 50%;
+            display: inline-block;
+            position: center;
+            margin-right: 1px;
+        }
+
+        .circlered {
+            height: 20px;
+            width: 20px;
+            background-color: #ff3300;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 1px;
+        }
+
+        .circleorange {
+            height: 20px;
+            width: 20px;
+            background-color: #ff9900;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 1px;
+        }
+
+        .circleyellow {
+            height: 20px;
+            width: 20px;
+            background-color: #ffff00;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 1px;
+        }
+
+
+    </style>
+</head>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var i = 1;
+        var nodesVal;
+        $('#generate').click(function () {
+
+            var values = {{ myvar | safe if myvar is defined else "[]" }};
+
+            var select = $('<select>').prop('id', 'intervene' + i.toString())
+                .prop('class', 'nodes intervene')
+                .prop('name', 'intervene');
+
+            var range = $('<input>').prop('id', 'policy' + i.toString())
+                .prop('name', 'policy')
+                .prop('class', 'slider policy')
+                .prop('type', 'range')
+                .prop('min', '1')
+                .prop('max', '100')
+                .prop('value', '1')
+                .prop('step', '10');
+            //.prop('list', 'steplist');
+
+            $(values).each(function () {
+                select.append($("<option>")
+                    .prop('value', this)
+                    .text(this.charAt(0).toUpperCase() + this.slice(1)));
+            });
+
+            var label = $("<label>").prop('for', 'policy')
+                .text("Choose your policy: ");
+
+            var br = $("<br>");
+
+            $('#container').append(label).append(select).append(range);
+            $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
+                var node1 = $('#intervene1').val();
+                var val1 = $('#policy1').val();
+                var node2 = $('#intervene2').val();
+                var val2 = $('#policy2').val();
+                var node3 = $('#intervene3').val();
+                var val3 = $('#policy3').val();
+                nodesVal = [
+                    {"node": node1, "value": val1},
+                    {"node": node2, "value": val2},
+                    {"node": node3, "value": val3}
+                ];
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url_for('graph') }}",
+                    contentType: 'application/json;charset=UTF-8',
+                    data: JSON.stringify({'data': nodesVal}),
+                    dataType: 'json'
+                });
+                $('#framed').attr('src', $('#framed').attr('src'));
+            });
+            i++;
+
+        });
+    });
+    $('select').selectpicker();
+</script>
+<body>
+<header style="padding-left: 45%;">
+    <H1>InterVision</H1>
+</header>
+<div class="wrapping">
+    <div class="network">
+        <iframe id="framed" style="width: 100%;height: 290px; overflow: hidden;"
+                src="{{ url_for('graph') }}">
+        </iframe>
+    </div>
+    <div class="options">
+        <form action="/" class="form-inline">
+            <div class="form-group">
+                <select class="selectpicker" style="width: 100%;" multiple data-live-search="true">
+                    {#    <option selected>Select All</option>
+            <option selected>Deselect All</option>#}
+                    <option selected>Core</option>
+                    <option selected>Family</option>
+                    <option selected>Education</option>
+                    <option selected>Relationships</option>
+                    <option selected>Work</option>
+                    <option selected>Social</option>
+                    <option selected>Skills</option>
+                    <option selected>Health</option>
+                </select>
+            </div>
+        </form>
+        <button id="generate">Generate Intervention</button>
+        <div id="container">{# here comes the options with slider #}
+        </div>
+    </div>
+</div>
+<div>
+    <table style="width:74%">
+        <tr>
+            <td style="font-Weight:bold">Legend:</td>
+            <td>
+                <div class="circledgreen"></div>
+                Relationships
+            </td>
+            <td>
+                <div class="circlelgreen"></div>
+                Skills
+            </td>
+            <td>
+                <div class="circledblue"></div>
+                Education
+            </td>
+            <td>
+                <div class="circlelblue"></div>
+                Core
+            </td>
+            <td>
+                <div class="circlepink"></div>
+                Family
+            </td>
+            <td>
+                <div class="circlered"></div>
+                Social
+            </td>
+            <td>
+                <div class="circleorange"></div>
+                Work
+            </td>
+            <td>
+                <div class="circleyellow"></div>
+                Health
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+.banner {
+    display: flex;
+    justify-content: center;
+}
+
+.ban {
+    height: 170px;
+    width: 450px;
+}
+
+.wrapping {
+    width: 100%;
+}
+
+.network, .options {
+}
+
+.network {
+    float: left;
+    width: 70%;
+    display: inline-block !important;
+}
+
+.options {
+    width: 30%;
+    float: right;
+    display: inline-block;
+
+}
+
+.browsing {
+    top: 250px;
+    padding-left: 35%;
+}
+
+.dropbtn {
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    z-index: 1;
+}
+
+.dropdown-content a {
+    text-decoration: none;
+    display: block;
+    width: 100px;
+    padding: 10px;
+}
+
+.dropdown-content a:hover {
+    background-color: ghostwhite;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+    background-color: #f1f1f1;
+}
+
+.generate {
+    display: inline-block;
+}
+
+#container {
+    width: 50%;
+    float: left;
+}
+
+
+.mytooltip {
+    position: relative;
+    display: inline-block;
+    font-size: 8px;
+    color: royalblue;
+    font-family: "Lucinda Grande", "Lucinda Sans Unicode", Helvetica, Arial, Verdana, sans-serif;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    padding-left: 3px;
+    padding-top: -10px;
+    background: #fff;
+    border: 2px solid royalblue;
+}
+
+.mytooltip .tooltiptext {
+    visibility: hidden;
+    width: 230px;
+    background-color: ghostwhite;
+    color: black;
+    border-radius: 6px;
+    padding: 5px;
+    font-weight: normal;
+    font-size: 10px;
+    text-align: justify;;
+
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+}
+
+.mytooltip:hover .tooltiptext {
+    visibility: visible;
+}
+
+#intervene {
+    width: 200px;
+}
+
+#policy {
+    width: 200px;
+}
