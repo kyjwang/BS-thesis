@@ -10,6 +10,8 @@ import os
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+from openpyxl import load_workbook
+
 file = xlrd.open_workbook("network.xlsx")
 categories = file.sheet_by_index(0)
 network = file.sheet_by_index(1)
@@ -77,7 +79,7 @@ def graph():
             category = _data[1].value
             category_dict[node] = category
 
-    pr = nx.pagerank_numpy(G, alpha=0.65)
+    pr = nx.pagerank(G, alpha=0.65)
     pr_list = list(pr)
     pr_keys = list(pr.keys())
     pr_values = list(pr.values())
@@ -201,7 +203,13 @@ def graph():
     # nt.hrepulsion(spring_length=1000,node_distance=1000)
     # nt.force_atlas_2based(gravity=-200)
     nt.barnes_hut(overlap=1, gravity=-500)
-    nt.save_graph('templates/nx.html')
+    nt = Network(height='100%', width='100%', directed=True)
+    nt.from_nx(G)
+
+    # Check if the file exists before saving
+    if not os.path.exists('templates/nx.html'):
+        nt.save_graph('templates/nx.html')
+    
     return render_template("nx.html")
 
 

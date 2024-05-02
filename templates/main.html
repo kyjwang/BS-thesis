@@ -1,301 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="/static/styles/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterVision</title>
+    
+    <!-- Bootstrap and Bootstrap-Select CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/css/bootstrap-select.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/css/bootstrap-select.css">
+    <link rel="stylesheet" href="/static/styles/style.css"> <!-- Custom Styles -->
+    
+    <!-- jQuery and Bootstrap JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.8.1/js/bootstrap-select.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
-    <meta charset="UTF-8">
-    <title>InterVision</title>
-    <style type="text/css">
-        .wrapping {
+    <style>
+        body {
+            background-color: #9abfe4;
+            padding-top: 20px;
+        }
+
+        .network, .options {
+            border: 5px solid #dee2e6;
+            height: 500px; /* Adjusted for uniformity */
+            overflow-y: auto;
+            background: #ffffff;
+            border-radius: 5px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(250, 22, 22, 0.91);
         }
 
         .network {
             float: left;
             width: 71%;
-            display: inline-block !important;
             margin-left: 3px;
         }
 
         .options {
-            width: 25%;
             float: right;
-            display: inline-block;
+            width: 25%;
         }
 
         button {
-            margin-top: 1px;
+            margin-top: 20px;
             background-image: linear-gradient(#f7f8fa, #e7e9ec);
             border-color: #adb1b8 #a2a6ac #8d9096;
             border-style: solid;
             border-width: 1px;
             border-radius: 3px;
             box-shadow: rgba(255, 255, 255, .6) 0 1px 0 inset;
-            box-sizing: border-box;
             color: #0f1111;
-            cursor: pointer;
             display: inline-block;
-            font-family: "Amazon Ember", Arial, sans-serif;
             font-size: 14px;
             height: 29px;
-            outline: 0;
-            overflow: hidden;
-            text-align: center;
-            text-decoration: none;
-            text-overflow: ellipsis;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            white-space: nowrap;
-            width: 91%;
-        }
-
-        button:active {
-            border-bottom-color: #a2a6ac;
-        }
-
-        button:active:hover {
-            border-bottom-color: #a2a6ac;
-        }
-
-        button:hover {
-            border-color: #a2a6ac #979aa1 #82858a;
-        }
-
-        .nodes {
             width: 92%;
         }
 
-        .policy {
+        .nodes, .policy {
             width: 92%;
             margin-bottom: 5px;
         }
 
-        table, th, td {
-            border: 1px solid white;
-        }
-
-        table {
-            margin-left: 2px;
-        }
-
-        .circledgreen {
+        .circle {
             height: 20px;
             width: 20px;
-            background-color: #009933;
             border-radius: 50%;
             display: inline-block;
-            position: center;
-            margin-right: 1px;
         }
 
-        .circlelgreen {
-            height: 20px;
-            width: 20px;
-            background-color: #99cc00;
-            border-radius: 50%;
-            display: inline-block;
-            position: center;
-            margin-right: 1px;
-        }
-
-        .circledblue {
-            height: 20px;
-            width: 20px;
-            background-color: #0033cc;
-            border-radius: 50%;
-            display: inline-block;
-            position: center;
-            margin-right: 1px;
-        }
-
-        .circlelblue {
-            height: 20px;
-            width: 20px;
-            background-color: #99ccff;
-            border-radius: 50%;
-            display: inline-block;
-            position: center;
-            margin-right: 1px;
-        }
-
-        .circlepink {
-            height: 20px;
-            width: 20px;
-            background-color: #ff6699;
-            border-radius: 50%;
-            display: inline-block;
-            position: center;
-            margin-right: 1px;
-        }
-
-        .circlered {
-            height: 20px;
-            width: 20px;
-            background-color: #ff3300;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 1px;
-        }
-
-        .circleorange {
-            height: 20px;
-            width: 20px;
-            background-color: #ff9900;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 1px;
-        }
-
-        .circleyellow {
-            height: 20px;
-            width: 20px;
-            background-color: #ffff00;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 1px;
-        }
-
-
+        /* Specific colors for legend */
+        .circledgreen { background-color: #009933; }
+        .circlelgreen { background-color: #99cc00; }
+        .circledblue { background-color: #0033cc; }
+        .circlelblue { background-color: #99ccff; }
+        .circlepink { background-color: #ff6699; }
+        .circlered { background-color: #ff3300; }
+        .circleorange { background-color: #ff9900; }
+        .circleyellow { background-color: #ffff00; }
     </style>
 </head>
-<script type="text/javascript">
 
-    $(document).ready(function () {
-        var i = 1;
-        var nodesVal;
-        $('#generate').click(function () {
-
-            var values = {{ myvar | safe if myvar is defined else "[]" }};
-
-            var select = $('<select>').prop('id', 'intervene' + i.toString())
-                .prop('class', 'nodes intervene')
-                .prop('name', 'intervene');
-
-            var range = $('<input>').prop('id', 'policy' + i.toString())
-                .prop('name', 'policy')
-                .prop('class', 'slider policy')
-                .prop('type', 'range')
-                .prop('min', '1')
-                .prop('max', '100')
-                .prop('value', '1')
-                .prop('step', '10');
-            //.prop('list', 'steplist');
-
-            $(values).each(function () {
-                select.append($("<option>")
-                    .prop('value', this)
-                    .text(this.charAt(0).toUpperCase() + this.slice(1)));
-            });
-
-            var label = $("<label>").prop('for', 'policy')
-                .text("Choose your policy: ");
-
-            var br = $("<br>");
-
-            $('#container').append(label).append(select).append(range);
-            $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
-                var node1 = $('#intervene1').val();
-                var val1 = $('#policy1').val();
-                var node2 = $('#intervene2').val();
-                var val2 = $('#policy2').val();
-                var node3 = $('#intervene3').val();
-                var val3 = $('#policy3').val();
-                nodesVal = [
-                    {"node": node1, "value": val1},
-                    {"node": node2, "value": val2},
-                    {"node": node3, "value": val3}
-                ];
-                $.ajax({
-                    type: "POST",
-                    url: "{{ url_for('graph') }}",
-                    contentType: 'application/json;charset=UTF-8',
-                    data: JSON.stringify({'data': nodesVal}),
-                    dataType: 'json'
-                });
-                $('#framed').attr('src', $('#framed').attr('src'));
-            });
-            i++;
-
-        });
-    });
-    $('select').selectpicker();
-</script>
 <body>
-<header style="padding-left: 45%;">
-    <H1>InterVision</H1>
-</header>
-<div class="wrapping">
-    <div class="network">
-        <iframe id="framed" style="width: 100%;height: 290px; overflow: hidden;"
-                src="{{ url_for('graph') }}">
-        </iframe>
-    </div>
-    <div class="options">
-        <form action="/" class="form-inline">
-            <div class="form-group">
-                <select class="selectpicker" style="width: 100%;" multiple data-live-search="true">
-                    {#    <option selected>Select All</option>
-            <option selected>Deselect All</option>#}
-                    <option selected>Core</option>
-                    <option selected>Family</option>
-                    <option selected>Education</option>
-                    <option selected>Relationships</option>
-                    <option selected>Work</option>
-                    <option selected>Social</option>
-                    <option selected>Skills</option>
-                    <option selected>Health</option>
-                </select>
+    <div class="container">
+        <div class="header bg-light p-3 text-center shadow-sm">
+            <h1>InterVision</h1>
+        </div>
+        <div class="row">
+            <div class="col-lg-9 mb-3 network">
+                <iframe id="framed" src="/graph" style="width: 100%; height: 100%; border: none;"></iframe>
             </div>
-        </form>
-        <button id="generate">Generate Intervention</button>
-        <div id="container">{# here comes the options with slider #}
+            <div class="col-lg-3 mb-3 options">
+                <form>
+                    <div class="form-group">
+                        <select class="selectpicker form-control" multiple data-live-search="true" id="select-multiple">
+                            <option>Core</option>
+                            <option>Family</option>
+                            <option>Education</option>
+                            <option>Relationships</option>
+                            <option>Work</option>
+                            <option>Social</option>
+                            <option>Skills</option>
+                            <option>Health</option>
+                        </select>
+                    </div>
+                    <button type="button" id="generate" class="btn btn-primary btn-block">Generate Intervention</button>
+                </form>
+                <div id="container"></div> <!-- Container for dynamically added elements -->
+            </div>
+        </div>
+        <div class="legend bg-light p-3 d-flex justify-content-between">
+            <div><span class="circle circledgreen"></span> Relationships</div>
+            <div><span class="circle circlelgreen"></span> Skills</div>
+            <div><span class="circle circledblue"></span> Education</div>
+            <div><span class="circle circlelblue"></span> Core</div>
+            <div><span class="circle circlepink"></span> Family</div>
+            <div><span class="circle circlered"></span> Social</div>
+            <div><span class="circle circleorange"></span> Work</div>
+            <div><span class="circle circleyellow"></span> Health</div>
         </div>
     </div>
-</div>
-<div>
-    <table style="width:74%">
-        <tr>
-            <td style="font-Weight:bold">Legend:</td>
-            <td>
-                <div class="circledgreen"></div>
-                Relationships
-            </td>
-            <td>
-                <div class="circlelgreen"></div>
-                Skills
-            </td>
-            <td>
-                <div class="circledblue"></div>
-                Education
-            </td>
-            <td>
-                <div class="circlelblue"></div>
-                Core
-            </td>
-            <td>
-                <div class="circlepink"></div>
-                Family
-            </td>
-            <td>
-                <div class="circlered"></div>
-                Social
-            </td>
-            <td>
-                <div class="circleorange"></div>
-                Work
-            </td>
-            <td>
-                <div class="circleyellow"></div>
-                Health
-            </td>
-        </tr>
-    </table>
-</div>
+
+    <script>
+        $(document).ready(function () {
+            var i = 1;  // Counter for elements to maintain unique IDs
+            $('#generate').click(function () {
+                var values = $("#select-multiple").val();  // Get selected values from the dropdown
+                if (!values) {
+                    alert("Please select at least one option.");
+                    return;  // Prevents further actions if no option is selected
+                }
+
+                var select = $('<select>').prop('id', 'intervene' + i)
+                                          .addClass('nodes intervene form-control mb-2')
+                                          .prop('name', 'intervene' + i);
+
+                var range = $('<input>').prop('id', 'policy' + i)
+                                        .addClass('slider policy form-control-range mb-2')
+                                        .prop('type', 'range')
+                                        .prop('min', '1')
+                                        .prop('max', '100')
+                                        .prop('value', '50')
+                                        .prop('step', '1');
+
+                $(values).each(function () {
+                    select.append($('<option>').val(this).text(this));  // Append options to the new select element
+                });
+
+                var label = $('<label>').prop('for', 'policy' + i).text("Choose your policy: ");
+                $('#container').append(label, select, range);  // Append new elements to the container div
+
+                i++;  // Increment the counter for the next elements
+            });
+
+            $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
+        });
+    </script>
 </body>
 </html>
