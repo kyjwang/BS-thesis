@@ -24,7 +24,7 @@
         .network, .options {
             border: 5px solid #dee2e6;
             height: 800px; /* Adjusted for uniformity */
-            overflow-y: auto;
+            overflow: hidden;
             background: #ffffff;
             border-radius: 5px;
             margin-bottom: 30px;
@@ -33,8 +33,8 @@
 
         .network {
             float: left;
-            width: 71%;
-            margin-left: 3px;
+            width: 75%;
+            margin-left: 0px;
         }
 
         .options {
@@ -58,7 +58,7 @@
         }
 
         .nodes, .policy {
-            width: 92%;
+            width: 100%;
             margin-bottom: 5px;
         }
 
@@ -121,51 +121,76 @@
         </div>
     </div>
 
-    <script>
+    <script type="text/javascript">
         $(document).ready(function () {
-            var i = 1;  // Counter for elements to maintain unique IDs
+            var i = 1;
+            var nodesVal;
             $('#generate').click(function () {
-                var values = $("#select-multiple").val();  // Get selected values from the dropdown
-                if (!values) {
-                    alert("Please select at least one option.");
-                    return;  // Prevents further actions if no option is selected
-                }
-        
+    
+                var values = {{ myvar | safe if myvar is defined else "[]" }};
+    
                 var containerDiv = $('<div>').addClass('intervention').prop('id', 'intervention' + i);
-        
-                var select = $('<select>').prop('id', 'intervene' + i)
+    
+                var select = $('<select>').prop('id', 'intervene' + i.toString())
                                           .addClass('nodes intervene form-control mb-2')
-                                          .prop('name', 'intervene' + i);
-        
-                $(values).each(function () {
-                    select.append($('<option>').val(this).text(this));  // Append options to the new select element
-                });
-        
+                                          .prop('name', 'intervene');
+    
                 var range = $('<input>').prop('id', 'policy' + i)
                                         .addClass('slider policy form-control-range mb-2')
                                         .prop('type', 'range')
                                         .prop('min', '1')
                                         .prop('max', '100')
-                                        .prop('value', '50')
-                                        .prop('step', '1');
-        
+                                        .prop('value', '1')
+                                        .prop('step', '10');
+    
+                $(values).each(function () {
+                    select.append($("<option>")
+                        .prop('value', this)
+                        .text(this.charAt(0).toUpperCase() + this.slice(1)));
+                });
+    
+                var label = $("<label>").prop('for', 'policy' + i).text("Choose your policy: ");
+    
                 var deleteButton = $('<button>').prop('type', 'button')
                                                 .addClass('btn btn-danger mb-2')
                                                 .text('Delete')
                                                 .click(function() {
                                                     containerDiv.remove();  // Removes the div and all its children from the DOM
                                                 });
-        
-                var label = $('<label>').prop('for', 'policy' + i).text("Choose your policy: ");
-                
-                containerDiv.append(label, select, range, deleteButton);  // Append new elements to the intervention div
+    
+                containerDiv.append(label).append(select).append(range).append(deleteButton);  // Append new elements to the intervention div
                 $('#container').append(containerDiv);  // Append the intervention div to the container
-        
-                i++;  // Increment the counter for the next elements
+    
+                $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
+                    var node1 = $('#intervene1').val();
+                    var val1 = $('#policy1').val();
+                    var node2 = $('#intervene2').val();
+                    var val2 = $('#policy2').val();
+                    var node3 = $('#intervene3').val();
+                    var val3 = $('#policy3').val();
+                    nodesVal = [
+                        {"node": node1, "value": val1},
+                        {"node": node2, "value": val2},
+                        {"node": node3, "value": val3}
+                    ];
+                    $.ajax({
+                        type: "POST",
+                        url: "{{ url_for('graph') }}",
+                        contentType: 'application/json;charset=UTF-8',
+                        data: JSON.stringify({'data': nodesVal}),
+                        dataType: 'json'
+                    });
+                    $('#framed').attr('src', $('#framed').attr('src'));
+                });
+    
+                i++;
+    
             });
-        
+    
             $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
         });
-        </script>
+    </script>
+    
+    
 </body>
 </html>
