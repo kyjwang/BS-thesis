@@ -23,12 +23,12 @@
 
         .network, .options {
             border: 5px solid #dee2e6;
-            height: 500px; /* Adjusted for uniformity */
+            height: 800px; /* Adjusted for uniformity */
             overflow-y: auto;
             background: #ffffff;
             border-radius: 5px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(250, 22, 22, 0.91);
+            box-shadow: 0 4px 6px rgba(127, 184, 219, 0.91);
         }
 
         .network {
@@ -130,11 +130,17 @@
                     alert("Please select at least one option.");
                     return;  // Prevents further actions if no option is selected
                 }
-
+        
+                var containerDiv = $('<div>').addClass('intervention').prop('id', 'intervention' + i);
+        
                 var select = $('<select>').prop('id', 'intervene' + i)
                                           .addClass('nodes intervene form-control mb-2')
                                           .prop('name', 'intervene' + i);
-
+        
+                $(values).each(function () {
+                    select.append($('<option>').val(this).text(this));  // Append options to the new select element
+                });
+        
                 var range = $('<input>').prop('id', 'policy' + i)
                                         .addClass('slider policy form-control-range mb-2')
                                         .prop('type', 'range')
@@ -142,19 +148,24 @@
                                         .prop('max', '100')
                                         .prop('value', '50')
                                         .prop('step', '1');
-
-                $(values).each(function () {
-                    select.append($('<option>').val(this).text(this));  // Append options to the new select element
-                });
-
+        
+                var deleteButton = $('<button>').prop('type', 'button')
+                                                .addClass('btn btn-danger mb-2')
+                                                .text('Delete')
+                                                .click(function() {
+                                                    containerDiv.remove();  // Removes the div and all its children from the DOM
+                                                });
+        
                 var label = $('<label>').prop('for', 'policy' + i).text("Choose your policy: ");
-                $('#container').append(label, select, range);  // Append new elements to the container div
-
+                
+                containerDiv.append(label, select, range, deleteButton);  // Append new elements to the intervention div
+                $('#container').append(containerDiv);  // Append the intervention div to the container
+        
                 i++;  // Increment the counter for the next elements
             });
-
+        
             $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
         });
-    </script>
+        </script>
 </body>
 </html>

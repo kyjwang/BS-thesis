@@ -20,7 +20,7 @@
 
 .network {
     flex-grow: 7; /* Equivalent to 70% of the space */
-    background-color: red; /* Temporary color for visualization */
+    background-color: rgb(43, 82, 178); /* Temporary color for visualization */
 }
 
 .options {
