@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Graph</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+    <style type="text/css">
+        #mynetwork {
+            width: 100%;
+            height: 100vh;
+            background-color: #ffffff;
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+    <div id="mynetwork"></div>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            var container = document.getElementById('mynetwork');
+            var data = {{ graph_data|tojson }};
+            var options = {
+                nodes: {
+                    shape: 'dot',
+                    size: 16,
+                    font: {
+                        size: 14,
+                        color: '#000000'
+                    },
+                    borderWidth: 2
+                },
+                edges: {
+                    width: 2,
+                    color: {
+                        color: '#cccccc',
+                        highlight: '#000000',
+                        hover: '#000000'
+                    },
+                    smooth: {
+                        type: 'continuous'
+                    }
+                },
+                physics: {
+                    stabilization: false,
+                    barnesHut: {
+                        gravitationalConstant: -30000,
+                        springConstant: 0.001,
+                        springLength: 200
+                    }
+                },
+                interaction: {
+                    hover: true
+                }
+            };
+            var network = new vis.Network(container, data, options);
+        });
+    </script>
+</body>
+</html>

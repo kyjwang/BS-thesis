@@ -1,105 +1,138 @@
-.banner {
-    display: flex;
-    justify-content: center;
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f0f2f5;
+    color: #333;
+    margin: 0;
+    overflow: hidden;
 }
 
-#mynetwork {
-    width: 100%; /* Make the graph container fill the available width */
-    height: 800px; /* Set a specific height for the graph container */
-}
-
-.ban {
-    height: 170px;
-    width: 450px;
-}
-
-.wrapping {
-    display: flex;
+.header {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: rgb(0, 0, 0);
+    padding: 20px;
+    text-align: center;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+    position: absolute;
     width: 100%;
+    z-index: 10;
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    font-weight: 300;
 }
 
 .network {
-    flex-grow: 7; /* Equivalent to 70% of the space */
-    background-color: rgb(43, 82, 178); /* Temporary color for visualization */
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background: #ffffff;
 }
 
 .options {
-    flex-grow: 3; /* Equivalent to 30% of the space */
+    position: absolute;
+    top: 100px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    max-height: 80%;
+    overflow-y: auto;
 }
 
-.browsing {
-    position: relative; /* Changed from absolute to relative */
-    padding-left: 35%; /* Adjust as needed */
-}
-
-.dropbtn {
-    padding: 10px;
+.button {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #000407;
     border: none;
+    border-radius: 5px;
+    color: white;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.dropdown {
-    position: relative;
+.button:hover {
+    background-color: #0056b3;
+}
+
+select, input[type="range"] {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    box-sizing: border-box;
+}
+
+.legend {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    z-index: 10;
+}
+
+.circle {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
     display: inline-block;
 }
 
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f1f1f1;
-    z-index: 1;
-}
+.circledgreen { background-color: #28a745; }
+.circlelgreen { background-color: #71c1a1; }
+.circledblue { background-color: #007bff; }
+.circlelblue { background-color: #85c1e9; }
+.circlepink { background-color: #e83e8c; }
+.circlered { background-color: #dc3545; }
+.circleorange { background-color: #fd7e14; }
+.circleyellow { background-color: #ffc107; }
 
 .dropdown-content a {
-    text-decoration: none;
-    display: block;
-    padding: 10px;
+    color: #333;
 }
 
 .dropdown-content a:hover {
-    background-color: ghostwhite;
+    background-color: #e9ecef;
 }
 
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-.generate {
+.tooltip {
+    position: relative;
     display: inline-block;
+    border-bottom: 1px dotted black;
 }
 
-#container {
-    width: 50%; /* If you want the container to take half of the network space */
-}
-
-.mytooltip {
-    display: inline-block;
-    font-size: 8px;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    background: #fff;
-    border: 2px solid royalblue;
-    text-align: center;
-    line-height: 18px; /* Align the text vertically */
-}
-
-.mytooltip .tooltiptext {
+.tooltip .tooltiptext {
     visibility: hidden;
-    width: 230px;
-    background-color: ghostwhite;
-    border-radius: 6px;
+    width: 120px;
+    background-color: #f9f9f9;
+    color: #333;
+    text-align: center;
+    border-radius: 5px;
     padding: 5px;
-    text-align: justify;
     position: absolute;
     z-index: 1;
+    bottom: 125%; 
+    left: 50%;
+    margin-left: -60px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.mytooltip:hover .tooltiptext {
+.tooltip:hover .tooltiptext {
     visibility: visible;
-}
-
-#intervene,
-#policy {
-    width: 200px;
 }
