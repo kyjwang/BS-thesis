@@ -21,22 +21,22 @@
         
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 2px;
         }
-
         header h1 {
             margin: 0;
             padding: 20px;
-            background-color: #007bff;
+            background-color: #1b2024;
             color: white;
             border-radius: 5px;
-            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 4px 8px rgba(50, 141, 221, 0.671);
         }
 
         .container {
             position: relative;
-            width: 100%;
+            width: 95%;
             height: 50vh; /* 50% of the viewport height */
+            border-radius: 100px;
             overflow: hidden;
         }
 
@@ -127,6 +127,9 @@
     <div class="form-container">
         <form action="/" method="post" enctype="multipart/form-data">
             <label for="network">Select the network:</label>
+            <div class="mytooltip">&#63;
+                <span class="tooltiptext">To do, upload an excel or csv file where the first column encompasses all the nodes list, and the second column represents the corresponding node category. Create another sheet where the first column encompasses all the nodes list, and the second column represents the corresponding node category.</span>
+            </div>
             <input id="network" type="file" name="network_info" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
             <input type="submit" value="Upload">
         </form>
