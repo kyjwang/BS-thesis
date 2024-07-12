@@ -22,36 +22,34 @@
             var container = document.getElementById('mynetwork');
             var data = {{ graph_data|tojson }};
             var options = {
-                nodes: {
-                    shape: 'dot',
-                    size: 16,
-                    font: {
-                        size: 14,
-                        color: '#000000'
+                "nodes": {
+                    "shape": 'dot',
+                    "size": 16,
+                    "font": {
+                        "size": 14,
+                        "color": '#000000'
                     },
-                    borderWidth: 2
+                    "borderWidth": 2
                 },
-                edges: {
-                    width: 2,
-                    color: {
-                        color: '#cccccc',
-                        highlight: '#000000',
-                        hover: '#000000'
-                    },
-                    smooth: {
-                        type: 'continuous'
+                "edges": {
+    "smooth": {
+      "type": "continuous",
+      "forceDirection": "none"
+    }
+  },
+                "physics": {
+                    "enabled": false,
+                    "minVelocity": false,
+                    "stabilization": {
+                        "enabled":false
                     }
+                    
                 },
-                physics: {
-                    stabilization: false,
-                    barnesHut: {
-                        gravitationalConstant: -30000,
-                        springConstant: 0.001,
-                        springLength: 200
-                    }
-                },
-                interaction: {
-                    hover: true
+                "interaction": {
+                    "hover": true,
+                    "dragNodes": true,
+                    "hideEdgesOnDrag": false,
+                    "hideNodesOnDrag": false
                 }
             };
             var network = new vis.Network(container, data, options);
