@@ -42,14 +42,9 @@
         </form>
     </div>
     <div class="legend d-flex justify-content-between">
-        <div><span class="circle circledgreen"></span> Relationships</div>
-        <div><span class="circle circlelgreen"></span> Skills</div>
-        <div><span class="circle circledblue"></span> Education</div>
-        <div><span class="circle circlelblue"></span> Core</div>
-        <div><span class="circle circlepink"></span> Family</div>
-        <div><span class="circle circlered"></span> Social</div>
-        <div><span class="circle circleorange"></span> Work</div>
-        <div><span class="circle circleyellow"></span> Health</div>
+        {% for category, color in category_colors.items() %}
+        <div><span class="circle" style="background-color: {{ color }};"></span> {{ category }}</div>
+        {% endfor %}
     </div>
 
     <script type="text/javascript">

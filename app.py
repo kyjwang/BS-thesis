@@ -64,7 +64,7 @@ def upload_file():
 
             graph_data = {"nodes": nodes, "edges": edges}
             print(graph_data)  # Debugging print
-            return render_template('main.html', graph_data=graph_data)
+            return render_template('main.html', graph_data=graph_data, category_colors=category_colors)
     return render_template('intro.html')
 
 @app.route('/graph', methods=['POST'])
