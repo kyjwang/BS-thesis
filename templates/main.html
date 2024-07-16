@@ -52,7 +52,8 @@
             var container = document.getElementById('mynetwork');
             var data = {{ graph_data|tojson }};
             console.log(data);  // Debugging print
-
+            
+            //the graph 
             var options = {
                 "nodes": {
                     "shape": 'dot',
@@ -71,10 +72,7 @@
                 },
                 "physics": {
                     "enabled": false,
-                    "minVelocity": false,
-                    "stabilization": {
-                        "enabled":false
-                    }
+                    
                     
                 },
                 "interaction": {
@@ -85,7 +83,13 @@
                 }
             };
             var network = new vis.Network(container, data, options);
-
+             // Release the fixed positions after a brief delay
+             setTimeout(function() {
+                data.nodes.forEach(function(node) {
+                    node.fixed = false;
+                });
+                network.setData(data);
+            }, 1000);  // Adjust the delay as needed
             var i = 1;
             var nodesVal;
             $('#generate').click(function () {
