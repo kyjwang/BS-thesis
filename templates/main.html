@@ -26,21 +26,16 @@
     <div class="options">
         <form>
             <div class="form-group">
-                <select class="selectpicker form-control" multiple data-live-search="true" id="select-multiple">
-                    <option>Core</option>
-                    <option>Family</option>
-                    <option>Education</option>
-                    <option>Relationships</option>
-                    <option>Work</option>
-                    <option>Social</option>
-                    <option>Skills</option>
-                    <option>Health</option>
-                </select>
+                <select class="selectpicker form-control" multiple data-live-search="true" id="select-multiple" name="categories">
+                    {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>                
             </div>
             <button type="button" id="generate" class="button btn-block">Generate Intervention</button>
-            <div id="container"></div>
         </form>
     </div>
+    <div id="container"></div>  <!-- Ensure this div exists for dynamic interventions -->
     <div class="legend d-flex justify-content-between">
         {% for category, color in category_colors.items() %}
         <div><span class="circle" style="background-color: {{ color }};"></span> {{ category }}</div>
@@ -49,6 +44,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            
             var container = document.getElementById('mynetwork');
             var data = {{ graph_data|tojson }};
             console.log(data);  // Debugging print
@@ -92,67 +88,89 @@
             }, 1000);  // Adjust the delay as needed
             var i = 1;
             var nodesVal;
+
             $('#generate').click(function () {
-    
                 var values = {{ graph_data.nodes|tojson }};
                 var containerDiv = $('<div>').addClass('intervention').prop('id', 'intervention' + i);
-    
-                    var select = $('<select>').prop('id', 'intervene' + i.toString())
-                                              .addClass('nodes intervene form-control mb-2')
-                                              .prop('name', 'intervene');
-        
-                    var range = $('<input>').prop('id', 'policy' + i)
-                                            .addClass('slider policy form-control-range mb-2')
-                                            .prop('type', 'range')
-                                            .prop('min', '1')
-                                            .prop('max', '100')
-                                            .prop('value', '1')
-                                            .prop('step', '10');
-        
-                    $(values).each(function () {
-                        select.append($("<option>")
-                            .prop('value', this.id)
-                            .text(this.label));
-                    });
-        
-                    var label = $("<label>").prop('for', 'policy' + i).text("Choose your policy: ");
-        
-                    var deleteButton = $('<button>').prop('type', 'button')
-                                                    .addClass('btn btn-danger mb-2')
-                                                    .text('Delete')
-                                                    .click(function() {
-                                                        containerDiv.remove();
-                                                    });
-        
-                    containerDiv.append(label).append(select).append(range).append(deleteButton);
-                    $('#container').append(containerDiv);
-        
-                    $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
-                        var interventions = [];
-                        for (var j = 1; j <= i; j++) {
-                            var node = $('#intervene' + j).val();
-                            var value = $('#policy' + j).val();
-                            if (node && value) {
-                                interventions.push({"node": node, "value": value});
-                            }
-                        }
-                        $.ajax({
-                            type: "POST",
-                            url: "{{ url_for('graph') }}",
-                            contentType: 'application/json;charset=UTF-8',
-                            data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': interventions}),
-                            dataType: 'json',
-                            success: function (response) {
-                                network.setData(response);
-                            }
-                        });
-                    });
-        
-                    i++;
+
+                var select = $('<select>').prop('id', 'intervene' + i.toString())
+                                          .addClass('nodes intervene form-control mb-2')
+                                          .prop('name', 'intervene');
+
+                var range = $('<input>').prop('id', 'policy' + i)
+                                        .addClass('slider policy form-control-range mb-2')
+                                        .prop('type', 'range')
+                                        .prop('min', '1')
+                                        .prop('max', '100')
+                                        .prop('value', '1')
+                                        .prop('step', '10');
+
+                $(values).each(function () {
+                    select.append($("<option>")
+                        .prop('value', this.id)
+                        .text(this.label));
                 });
+
+                var label = $("<label>").prop('for', 'policy' + i).text("Choose your policy: ");
         
-                $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
+                var deleteButton = $('<button>').prop('type', 'button')
+                                        .addClass('btn btn-danger mb-2')
+                                        .text('Delete')
+                                        .click(function() {
+                                            containerDiv.remove();
+                                        });
+
+        containerDiv.append(label).append(select).append(range).append(deleteButton);
+        $('#container').append(containerDiv);
+
+        $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
+            var interventions = [];
+            for (var j = 1; j <= i; j++) {
+                var node = $('#intervene' + j).val();
+                var value = $('#policy' + j).val();
+                if (node && value) {
+                    interventions.push({"node": node, "value": value});
+                }
+            }
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('graph') }}",
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': interventions}),
+                dataType: 'json',
+                success: function (response) {
+                    network.setData(response);
+                }
             });
-        </script>
-    </body>
+        });
+
+        i++;
+    });
+    $('#select-multiple').on('change', function () {
+            var selectedCategories = $(this).val();  // Get selected categories
+
+            // Send selected categories via AJAX to filter the graph
+            $.ajax({
+                type: "POST",
+                url: "{{ url_for('filter_graph') }}",
+                contentType: 'application/json;charset=UTF-8',
+                data: JSON.stringify({
+                'nodes': data.nodes,
+                'edges': data.edges,
+                'categories': selectedCategories  // Send the selected categories
+            }),
+                dataType: 'json',
+                success: function (response) {
+                console.log("Response from server:", response);  // Debugging print
+                network.setData(response);  // Update the graph with filtered data
+            },
+            error: function (error) {
+                console.error("Error in AJAX request: ", error);  // Debugging print
+            }
+            });
+        });
+    $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
+});
+</script>
+</body>
 </html>

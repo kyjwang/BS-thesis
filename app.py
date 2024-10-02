@@ -7,40 +7,43 @@ app = Flask(__name__)
 
 # Function to read the Excel file and extract categories with assigned colors
 def extract_categories_with_colors(file_path, sheet_name='Elements'):
-    # Read the Excel file
     df_elements = pd.read_excel(file_path, sheet_name=sheet_name)
-    
-    # Extract unique categories
     categories = df_elements['Type'].unique()
-    
-    # Generate random colors for each category
     category_colors = {category: random_color() for category in categories}
-    
     return category_colors
 
-# Function to generate a random color
 def random_color():
     return "#{:06x}".format(random.randint(0, 0xFFFFFF))
 
-# Function to calculate positions of nodes in a circle with category starting points
 def calculate_positions(elements_df):
     categories = elements_df['Type'].unique()
+    category_radii = {}
+    total_radius = 0
     num_categories = len(categories)
-    angle_step_category = 2 * math.pi / num_categories  # Angle step for categories
-    large_radius = 300  # Radius for the large circle of categories
-    small_radius = 50  # Radius for the smaller circles of nodes
 
+    # Calculate the radius of each category's circle
+    for category in categories:
+        num_nodes = len(elements_df[elements_df['Type'] == category])
+        small_radius = num_nodes * 15  
+        category_radii[category] = small_radius
+        total_radius += small_radius
+
+    large_radius = num_categories * 60 
     category_positions = {}
+    current_angle = 0 
 
     for i, category in enumerate(categories):
-        # Calculate starting point for each category on the larger circle
-        category_angle = i * angle_step_category
-        category_center_x = large_radius * math.cos(category_angle)
-        category_center_y = large_radius * math.sin(category_angle)
-
+        #the space between the small circles are depend on their size
+        small_radius = category_radii[category]
+        angle_step_category = 2 * math.pi * (small_radius/total_radius)
+        current_angle += angle_step_category/2
+        category_center_x = large_radius * math.cos(current_angle)
+        category_center_y = large_radius * math.sin(current_angle)
+        
+        # Get all nodes in the category
         nodes_in_category = elements_df[elements_df['Type'] == category]
         num_nodes = len(nodes_in_category)
-        angle_step_node = 2 * math.pi / num_nodes  # Angle step for nodes within each category
+        angle_step_node = 2 * math.pi / num_nodes
         positions = []
 
         for j, node in enumerate(nodes_in_category.itertuples()):
@@ -51,6 +54,7 @@ def calculate_positions(elements_df):
             positions.append((node.Label, x, y))
 
         category_positions[category] = positions
+        current_angle += angle_step_category/2 # Update the angle for the next category
 
     return category_positions
 
@@ -69,7 +73,7 @@ def upload_file():
             # Extract categories with assigned colors
             category_colors = extract_categories_with_colors(network_file)
             category_positions = calculate_positions(elements_df)
-            # Function to assign color based on category
+            categories = elements_df['Type'].unique()
             def assign_colors(category):
                 return category_colors.get(category, '#d3d3d3')  # Default color if category not found
             
@@ -79,8 +83,9 @@ def upload_file():
                         "id": label,
                         "label": label,
                         "color": assign_colors(category),
+                        "category" : category,
                         "shape": "dot",
-                        "size": 20,
+                        "size": 25,
                         "x": x,
                         "y": y,
                         "fixed": {"x": True, "y": True}  # Initially fix the nodes
@@ -98,8 +103,7 @@ def upload_file():
                     edges.append(edge)
 
             graph_data = {"nodes": nodes, "edges": edges}
-            print(graph_data)  # Debugging print
-            return render_template('main.html', graph_data=graph_data, category_colors=category_colors)
+            return render_template('main.html', graph_data=graph_data, category_colors=category_colors, categories=categories)
     return render_template('intro.html')
 
 @app.route('/graph', methods=['POST'])
@@ -116,8 +120,32 @@ def graph():
                 node['size'] += int(intervention['value'])  # Example intervention effect
     
     graph_data = {"nodes": nodes, "edges": edges}
-    print(graph_data)  # Debugging print
     return jsonify(graph_data)
+
+@app.route('/filter_graph', methods=['POST'])
+def filter_graph():
+        data = request.get_json()
+        nodes = data['nodes']
+        edges = data['edges']
+        selected_categories = data['categories']  # Get selected categories
+
+        print("Received categories:", selected_categories)  # Debugging print
+
+        # Filter nodes based on selected categories
+        filtered_nodes = [node for node in nodes if node['category'] in selected_categories]
+        print("Filtered nodes:", filtered_nodes)  # Debugging print
+
+        # Filter edges
+        filtered_edges = [edge for edge in edges if
+                          any(node['id'] == edge['from'] for node in filtered_nodes) and
+                          any(node['id'] == edge['to'] for node in filtered_nodes)]
+        print("Filtered edges:", filtered_edges)  # Debugging print
+
+        graph_data = {"nodes": filtered_nodes, "edges": filtered_edges}
+
+        return jsonify(graph_data)
+
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
