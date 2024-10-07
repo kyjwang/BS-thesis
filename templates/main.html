@@ -33,9 +33,10 @@
                 </select>                
             </div>
             <button type="button" id="generate" class="button btn-block">Generate Intervention</button>
+            <div id="container"></div>  <!-- Ensure this div exists for dynamic interventions -->
         </form>
     </div>
-    <div id="container"></div>  <!-- Ensure this div exists for dynamic interventions -->
+    
     <div class="legend d-flex justify-content-between">
         {% for category, color in category_colors.items() %}
         <div><span class="circle" style="background-color: {{ color }};"></span> {{ category }}</div>
@@ -100,10 +101,20 @@
                 var range = $('<input>').prop('id', 'policy' + i)
                                         .addClass('slider policy form-control-range mb-2')
                                         .prop('type', 'range')
-                                        .prop('min', '1')
+                                        .prop('min', '-100')
                                         .prop('max', '100')
-                                        .prop('value', '1')
-                                        .prop('step', '10');
+                                        .prop('value', '0')
+                                        .prop('step', '5');
+
+                var valueDisplay = $('<span>').prop('id', 'valueDisplay' + i)  // Give a unique ID to the value display span
+                                              .addClass('slider-value')
+                                              .text('0');  // Set the initial display value to 0
+
+                // Event listener to update the value display when the slider value changes
+                range.on('input', function() {
+                    var currentValue = $(this).val();
+                    valueDisplay.text(currentValue);  // Update the text of the span with the current slider value
+                });
 
                 $(values).each(function () {
                     select.append($("<option>")
@@ -120,19 +131,19 @@
                                             containerDiv.remove();
                                         });
 
-        containerDiv.append(label).append(select).append(range).append(deleteButton);
-        $('#container').append(containerDiv);
+                containerDiv.append(label).append(select).append(valueDisplay).append(range).append(deleteButton);
+                $('#container').append(containerDiv);
 
-        $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
-            var interventions = [];
-            for (var j = 1; j <= i; j++) {
+                $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
+                var interventions = [];
+                for (var j = 1; j <= i; j++) {
                 var node = $('#intervene' + j).val();
                 var value = $('#policy' + j).val();
                 if (node && value) {
                     interventions.push({"node": node, "value": value});
+                    }
                 }
-            }
-            $.ajax({
+                $.ajax({
                 type: "POST",
                 url: "{{ url_for('graph') }}",
                 contentType: 'application/json;charset=UTF-8',
@@ -140,13 +151,13 @@
                 dataType: 'json',
                 success: function (response) {
                     network.setData(response);
-                }
+                    }
+                });
+                });
+                i++;
             });
-        });
 
-        i++;
-    });
-    $('#select-multiple').on('change', function () {
+            $('#select-multiple').on('change', function () {
             var selectedCategories = $(this).val();  // Get selected categories
 
             // Send selected categories via AJAX to filter the graph
@@ -166,11 +177,11 @@
             },
             error: function (error) {
                 console.error("Error in AJAX request: ", error);  // Debugging print
-            }
+                }
+              });
             });
+            $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
         });
-    $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
-});
 </script>
 </body>
 </html>

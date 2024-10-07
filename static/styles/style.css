@@ -73,6 +73,14 @@ select, input[type="range"] {
     box-sizing: border-box;
 }
 
+.slider-value {
+    position: relative;
+    display: block;
+    text-align: center;
+    margin-bottom: 5px;  /* Adds space between the value and the slider */
+    font-weight: bold;
+}
+
 .legend {
     background-color: rgba(255, 255, 255, 0.8);
     padding: 10px;

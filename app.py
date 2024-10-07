@@ -58,6 +58,9 @@ def calculate_positions(elements_df):
 
     return category_positions
 
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -101,7 +104,7 @@ def upload_file():
                         "width": row.get("Label2", 1)
                     }
                     edges.append(edge)
-
+            
             graph_data = {"nodes": nodes, "edges": edges}
             return render_template('main.html', graph_data=graph_data, category_colors=category_colors, categories=categories)
     return render_template('intro.html')
@@ -112,15 +115,47 @@ def graph():
     nodes = data['nodes']
     edges = data['edges']
     interventions = data.get('interventions', [])
-    
-    # Apply interventions to nodes (if necessary)
-    for intervention in interventions:
+
+    # Helper function to find a node in the list by its 'id'
+    def find_node_by_id(node_id, nodes):
         for node in nodes:
-            if node['id'] == intervention['node']:
-                node['size'] += int(intervention['value'])  # Example intervention effect
-    
+            if node['id'] == node_id:
+                return node
+        return None
+
+    # Recursive function to propagate size change through connected nodes
+    def propagate_size_change(node_id, size_change, nodes, edges, visited=None):
+        if visited is None:
+            visited = set()
+
+        # Mark the current node as visited
+        visited.add(node_id)
+
+        # Find the node in the list and update its size
+        current_node = find_node_by_id(node_id, nodes)
+        if current_node:
+            current_node['size'] += int(size_change)  # Update the node's size
+
+        # Propagate the size change to connected nodes
+        for edge in edges:
+            if edge['from'] == node_id:  # If the current node has an outgoing edge
+                to_node = edge['to']
+                if to_node not in visited:  # Ensure no cycles
+                    propagate_size_change(to_node, size_change, nodes, edges, visited)
+
+    # Apply the size change for each intervention and propagate to connected nodes
+    for intervention in interventions:
+        node_id = intervention['node']
+        size_change = intervention['value']
+
+        # Propagate the size change from the node specified in the intervention
+        propagate_size_change(node_id, size_change, nodes, edges)
+
+    # Return the updated graph (nodes and edges) as JSON
     graph_data = {"nodes": nodes, "edges": edges}
     return jsonify(graph_data)
+
+    
 
 @app.route('/filter_graph', methods=['POST'])
 def filter_graph():
@@ -129,17 +164,17 @@ def filter_graph():
         edges = data['edges']
         selected_categories = data['categories']  # Get selected categories
 
-        print("Received categories:", selected_categories)  # Debugging print
+        
 
         # Filter nodes based on selected categories
         filtered_nodes = [node for node in nodes if node['category'] in selected_categories]
-        print("Filtered nodes:", filtered_nodes)  # Debugging print
+       
 
         # Filter edges
         filtered_edges = [edge for edge in edges if
                           any(node['id'] == edge['from'] for node in filtered_nodes) and
                           any(node['id'] == edge['to'] for node in filtered_nodes)]
-        print("Filtered edges:", filtered_edges)  # Debugging print
+        
 
         graph_data = {"nodes": filtered_nodes, "edges": filtered_edges}
 
