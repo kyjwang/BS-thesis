@@ -48,6 +48,8 @@
             
             var container = document.getElementById('mynetwork');
             var data = {{ graph_data|tojson }};
+            var pagerank_scores = {{ pagerank_scores|tojson }};
+
             console.log(data);  // Debugging print
             
             //the graph 
@@ -101,7 +103,7 @@
                 var range = $('<input>').prop('id', 'policy' + i)
                                         .addClass('slider policy form-control-range mb-2')
                                         .prop('type', 'range')
-                                        .prop('min', '-100')
+                                        .prop('min', '0')
                                         .prop('max', '100')
                                         .prop('value', '0')
                                         .prop('step', '5');
@@ -147,11 +149,15 @@
                 type: "POST",
                 url: "{{ url_for('graph') }}",
                 contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': interventions}),
+                data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': interventions, 'pagerank_scores' : pagerank_scores}),
                 dataType: 'json',
                 success: function (response) {
-                    network.setData(response);
-                    }
+                // Access only the graph_data from the response
+                data = response.graph_data
+                pagerank_scores = response.pagerank_scores
+                // Use the graphData to set the network's data
+                network.setData(data);
+                }
                 });
                 });
                 i++;
@@ -172,8 +178,9 @@
             }),
                 dataType: 'json',
                 success: function (response) {
-                console.log("Response from server:", response);  // Debugging print
-                network.setData(response);  // Update the graph with filtered data
+                console.log("Response from server:", response);
+                data = response  // Debugging print
+                network.setData(data);  // Update the graph with filtered data
             },
             error: function (error) {
                 console.error("Error in AJAX request: ", error);  // Debugging print
