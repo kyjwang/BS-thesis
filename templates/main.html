@@ -32,7 +32,7 @@
                     {% endfor %}
                 </select>                
             </div>
-            <button type="button" id="generate" class="button btn-block">Generate Intervention</button>
+            <button type="button" id="generate" class="button btn-block">New Intervention</button>
             <div id="container"></div>  <!-- Ensure this div exists for dynamic interventions -->
         </form>
     </div>
@@ -90,15 +90,22 @@
                 network.setData(data);
             }, 1000);  // Adjust the delay as needed
             var i = 1;
-            var nodesVal;
-
+            var interventions = [];
+            var filtered_data = {
+                "nodes": [],
+                "edges": []
+            };
             $('#generate').click(function () {
                 var values = {{ graph_data.nodes|tojson }};
                 var containerDiv = $('<div>').addClass('intervention').prop('id', 'intervention' + i);
 
                 var select = $('<select>').prop('id', 'intervene' + i.toString())
                                           .addClass('nodes intervene form-control mb-2')
-                                          .prop('name', 'intervene');
+                                          .prop('name', 'intervene')
+                                          .change(function() {
+                                          var node = $(this).val(); 
+                                          interventions.push({"node": node, "value": 0});
+                                          });
 
                 var range = $('<input>').prop('id', 'policy' + i)
                                         .addClass('slider policy form-control-range mb-2')
@@ -106,7 +113,49 @@
                                         .prop('min', '0')
                                         .prop('max', '100')
                                         .prop('value', '0')
-                                        .prop('step', '5');
+                                        .prop('step', '5')
+                                        .change(function() {
+                                        var value = $(this).val(); // Get the selected value
+                                        var index = $(this).attr('id').match(/\d+/)[0];  // e.g., "policy3"
+                                        var interveneValue = $('#intervene' + index).val();
+                                        for (var j = 0; j < interventions.length; j++) {
+                                            if (interventions[j].node === interveneValue) {
+                                                let oldvalue= interventions[j].value
+                                                interventions[j].value = $(this).val()
+                                                var actualchange = parseInt(interventions[j].value, 10) - oldvalue;
+                                                actualintervention = {"node":interveneValue, "value" : actualchange}
+                  
+                                                $.ajax({
+                                                    type: "POST",
+                                                    url: "{{ url_for('graph') }}",
+                                                    contentType: 'application/json;charset=UTF-8',
+                                                    data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': actualintervention, 'pagerank_scores' : pagerank_scores}),
+                                                    dataType: 'json',
+                                                    success: function (response) {
+                                                        data = response.graph_data
+                                                        pagerank_scores = response.pagerank_scores
+                                                        if(filtered_data.nodes.length!=0){
+                                                            final_data = {
+                                                            nodes: data.nodes.filter(node => 
+                                                            filtered_data.nodes.some(filteredNode => filteredNode.id === node.id)),
+                                                            edges: data.edges.filter(edge => 
+                                                            filtered_data.nodes.some(filteredNode => filteredNode.id === edge.from) &&
+                                                            filtered_data.nodes.some(filteredNode => filteredNode.id === edge.to))
+                                                            };
+                                                            network.setData(final_data)
+                                                        }else {
+                                                            network.setData(data);
+                                                        }
+                                                    
+                                                    }
+                                                    });
+                                                
+                                                
+                                                console.log("New intervention for node " + interveneValue + "from value:" + oldvalue + " to value: " + interventions[j].value+"with change"+actualchange);
+                                                break;
+                                            }
+                                        }
+                                        });
 
                 var valueDisplay = $('<span>').prop('id', 'valueDisplay' + i)  // Give a unique ID to the value display span
                                               .addClass('slider-value')
@@ -126,66 +175,91 @@
 
                 var label = $("<label>").prop('for', 'policy' + i).text("Choose your policy: ");
         
-                var deleteButton = $('<button>').prop('type', 'button')
+                var deleteButton = $('<button>').prop('id', 'delete' + i)
+                                        .prop('type', 'button')
                                         .addClass('btn btn-danger mb-2')
                                         .text('Delete')
                                         .click(function() {
-                                            containerDiv.remove();
+                                        var index = $(this).attr('id').match(/\d+/)[0];  // e.g., "policy3"
+                                        console.log(index)
+                                        var interveneValue = $('#intervene' + index).val();
+                                        console.log(interveneValue)
+                                        var policyValue = $('#policy' + index).val();
+                                        console.log(policyValue)
+                                        
+                                        for (var j = 0; j < interventions.length; j++) {
+                                            if (interventions[j].node === interveneValue & interventions[j].value === policyValue) {
+                                                let deletevalue = -1
+                                                interventions[j].value = parseInt(interventions[j].value,10) * deletevalue ;
+                                                console.log('new' +interventions[j].value)
+                                                $.ajax({
+                                                type: "POST",
+                                                url: "{{ url_for('graph') }}",
+                                                contentType: 'application/json;charset=UTF-8',
+                                                data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': interventions[j], 'pagerank_scores' : pagerank_scores}),
+                                                dataType: 'json',
+                                                success: function (response) {
+                                                
+                                                data = response.graph_data
+                                                pagerank_scores = response.pagerank_scores
+                                                if(filtered_data.nodes.length!=0){
+                                                            final_data = {
+                                                            nodes: data.nodes.filter(node => 
+                                                            filtered_data.nodes.some(filteredNode => filteredNode.id === node.id)),
+                                                            edges: data.edges.filter(edge => 
+                                                            filtered_data.nodes.some(filteredNode => filteredNode.id === edge.from) &&
+                                                            filtered_data.nodes.some(filteredNode => filteredNode.id === edge.to))
+                                                            };
+                                                            network.setData(final_data)
+                                                        }else {
+                                                            network.setData(data);
+                                                        }
+                                                // Use the graphData to set the network's data
+                                                
+                                                }
+                                                });
+                                                console.log("Deleted intervention for node " + interveneValue + " with value: " + policyValue);
+                                                break;
+                                            }   
+                                        }
+                                        containerDiv.remove();
                                         });
 
                 containerDiv.append(label).append(select).append(valueDisplay).append(range).append(deleteButton);
                 $('#container').append(containerDiv);
+                moveGenerateButtonToBottom(); 
+                function moveGenerateButtonToBottom() {
+                // Remove the existing generate button (if any)
+                    $('#globalSaveButton').remove();
 
-                $('#intervene' + i.toString() + ',#policy' + i.toString()).change(function () {
-                var interventions = [];
-                for (var j = 1; j <= i; j++) {
-                var node = $('#intervene' + j).val();
-                var value = $('#policy' + j).val();
-                if (node && value) {
-                    interventions.push({"node": node, "value": value});
-                    }
+                    // Recreate and append the generate button at the bottom
+                    var saveButton = $('<button>').prop('id', 'globalSaveButton')  // Unique ID for global button
+                                      .addClass('btn btn-success mb-2')
+                                      .text('Save')
+                                      .click(function() {
+                                          print()
+                                      });
+
+                    $('#container').append(saveButton);
                 }
-                $.ajax({
-                type: "POST",
-                url: "{{ url_for('graph') }}",
-                contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify({'nodes': data.nodes, 'edges': data.edges, 'interventions': interventions, 'pagerank_scores' : pagerank_scores}),
-                dataType: 'json',
-                success: function (response) {
-                // Access only the graph_data from the response
-                data = response.graph_data
-                pagerank_scores = response.pagerank_scores
-                // Use the graphData to set the network's data
-                network.setData(data);
-                }
-                });
-                });
+        
+        
+                console.log(i)
                 i++;
             });
+        
+    
 
             $('#select-multiple').on('change', function () {
             var selectedCategories = $(this).val();  // Get selected categories
-
-            // Send selected categories via AJAX to filter the graph
-            $.ajax({
-                type: "POST",
-                url: "{{ url_for('filter_graph') }}",
-                contentType: 'application/json;charset=UTF-8',
-                data: JSON.stringify({
-                'nodes': data.nodes,
-                'edges': data.edges,
-                'categories': selectedCategories  // Send the selected categories
-            }),
-                dataType: 'json',
-                success: function (response) {
-                console.log("Response from server:", response);
-                data = response  // Debugging print
-                network.setData(data);  // Update the graph with filtered data
-            },
-            error: function (error) {
-                console.error("Error in AJAX request: ", error);  // Debugging print
-                }
-              });
+            console.log (selectedCategories)
+            var filtered_nodes = data.nodes.filter(node => selectedCategories.includes(node.category));
+            var filtered_edges = data.edges.filter(edge => filtered_nodes.some(node => node.id === edge.from) && filtered_nodes.some(node => node.id === edge.to));
+            filtered_data = {
+                "nodes": filtered_nodes,
+                "edges": filtered_edges
+            };
+            network.setData(filtered_data)
             });
             $('.selectpicker').selectpicker();  // Initialize the selectpicker plugin
         });

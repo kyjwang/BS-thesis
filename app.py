@@ -17,18 +17,24 @@ def random_color():
     return "#{:06x}".format(random.randint(0, 0xFFFFFF))
 
 def assign_size(value):
-    if -1 <= value <= 0:
-        return 20  # Negative
-    elif 0 < value < 0.01:
-        return 30  # Very small
+    if -1.0 <= value < 0:
+        return 15
+    elif 0 <= value < 0.01:
+        return 25
     elif 0.01 <= value < 0.1:
-        return 40  # Small
+        return 35
     elif 0.1 <= value < 0.5:
-        return 50  # Medium
-    elif 0.5 <= value <= 1.0:
-        return 0  # Large
-    else:
-        return 0  # Out of expected range
+        return 45
+    elif 0.5 <= value < 1.0:
+        return 55
+    elif -10 < value < -1.0:
+        return 8
+    elif value <= -10: 
+        return 2
+    elif 1.0 <= value < 10 :
+        return 68
+    elif 10 <= value:
+        return 80
 
 def calculate_positions(elements_df):
     categories = elements_df['Type'].unique()
@@ -74,8 +80,6 @@ def calculate_positions(elements_df):
     return category_positions
 
 
-
-
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     if request.method == 'POST':
@@ -88,7 +92,6 @@ def upload_file():
             nodes = []
             edges = []
             
-            # Extract categories with assigned colors
             category_colors = extract_categories_with_colors(network_file)
             category_positions = calculate_positions(elements_df)
             categories = elements_df['Type'].unique()
@@ -98,7 +101,6 @@ def upload_file():
             # Create a graph for PageRank calculation
             G = nx.DiGraph()
 
-            # Populate nodes (without PageRank initially)
             for category, positions in category_positions.items():
                 for label, x, y in positions:
                     node = {
@@ -110,10 +112,10 @@ def upload_file():
                         "size": 25,  # Size will be updated later based on PageRank
                         "x": x,
                         "y": y,
-                        "fixed": {"x": True, "y": True}  # Initially fix the nodes
+                        "fixed": {"x": True, "y": True}  
                     }
                     nodes.append(node)
-                    G.add_node(label)  # Add node to the graph for PageRank
+                    G.add_node(label) 
 
             # Create edges
             for index, row in connections_df.iterrows():
@@ -124,20 +126,15 @@ def upload_file():
                         "width": row.get("Label2", 1)  # If no weight is provided, default is 1
                     }
                     edges.append(edge)
-                    G.add_edge(row["From"], row["To"], weight=row.get("Label2", 1))  # Add edge to the graph
+                    G.add_edge(row["From"], row["To"], weight=row.get("Label2", 1))  
             pagerank_scores = nx.pagerank(G, weight='weight')
             for node in nodes:
                 node_id = node['id']
                 if node_id in pagerank_scores:
-                    node['size'] = assign_size(pagerank_scores[node_id]) # Scale up for visualization
-
-            # Calculate PageRank using NetworkX
-            
-
-            # Prepare the graph data for rendering
+                    node['size'] = assign_size(pagerank_scores[node_id]) 
             graph_data = {"nodes": nodes, "edges": edges}
             
-            return render_template('main.html', graph_data=graph_data, category_colors=category_colors, categories=categories, pagerank_scores = pagerank_scores)
+        return render_template('main.html', graph_data=graph_data, category_colors=category_colors, categories=categories, pagerank_scores = pagerank_scores)
     return render_template('intro.html')
 
 @app.route('/graph', methods=['POST'])
@@ -145,11 +142,9 @@ def graph():
     data = request.get_json()
     nodes = data['nodes']
     edges = data['edges']
-    interventions = data.get('interventions', [])
+    intervention = data.get('interventions', None)
     pagerank_scores = data['pagerank_scores']
-
-    
-    # Helper function to find a node in the list by its 'id'
+  
     def find_node_by_id(node_id, nodes):
         for node in nodes:
             if node['id'] == node_id:
@@ -161,66 +156,30 @@ def graph():
         if visited is None:
             visited = set()
 
-        # Mark the current node as visited
         visited.add(node_id)
 
-        # Find the node in the list and update its size
         current_node = find_node_by_id(node_id, nodes)
         if current_node:
-            current_node['size'] += size_change # Update the node's size
             pagerank_scores[node_id] += size_change
-            print('Changed node:', node_id,size_change)
+            current_node['size'] = assign_size(pagerank_scores[node_id])
        
-        
-        # Propagate the size change to connected nodes
         for edge in edges:
             if edge['from'] == node_id:  # If the current node has an outgoing edge
                 to_node = edge['to']
                 if to_node not in visited: 
                     weights = float(edge['width']) # Ensure no cycles
-                    print('Weight:', weights)
                     propagate_size_change(to_node, size_change * weights, nodes, edges, visited)
-
-    # Apply the size change for each intervention and propagate to connected nodes
-    for intervention in interventions:
+    
+    if intervention:
         node_id = intervention['node']
         size_change = int(intervention['value'])
-
-
-        # Propagate the size change from the node specified in the intervention
         propagate_size_change(node_id, size_change, nodes, edges)
-
-    # Return the updated graph (nodes and edges) as JSON
+    
     graph_data = {"nodes": nodes, "edges": edges}
     return jsonify({
         "graph_data": graph_data,
         "pagerank_scores": pagerank_scores
     })
-
-    
-
-@app.route('/filter_graph', methods=['POST'])
-def filter_graph():
-        data = request.get_json()
-        nodes = data['nodes']
-        edges = data['edges']
-        selected_categories = data['categories']  # Get selected categories
-
-        
-
-        # Filter nodes based on selected categories
-        filtered_nodes = [node for node in nodes if node['category'] in selected_categories]
-       
-
-        # Filter edges
-        filtered_edges = [edge for edge in edges if
-                          any(node['id'] == edge['from'] for node in filtered_nodes) and
-                          any(node['id'] == edge['to'] for node in filtered_nodes)]
-        
-
-        graph_data = {"nodes": filtered_nodes, "edges": filtered_edges}
-
-        return jsonify(graph_data)
 
     
 

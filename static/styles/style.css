@@ -102,15 +102,6 @@ select, input[type="range"] {
     display: inline-block;
 }
 
-.circledgreen { background-color: #28a745; }
-.circlelgreen { background-color: #71c1a1; }
-.circledblue { background-color: #007bff; }
-.circlelblue { background-color: #85c1e9; }
-.circlepink { background-color: #e83e8c; }
-.circlered { background-color: #dc3545; }
-.circleorange { background-color: #fd7e14; }
-.circleyellow { background-color: #ffc107; }
-
 .dropdown-content a {
     color: #333;
 }
