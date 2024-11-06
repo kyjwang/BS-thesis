@@ -23,6 +23,12 @@
         <h1>InterVision</h1>
     </div>
     <div class="network" id="mynetwork"></div>
+    <div id="edgePopup" style="display:none; position:absolute; background:#f9f9f9; padding:10px; border:1px solid #ccc; border-radius:5px; z-index: 10;">
+        <p id="edgeInfo"></p>
+    </div>
+    <div id="nodePopup" style="display:none; position:absolute; background:#f9f9f9; padding:10px; border:1px solid #ccc; border-radius:5px; z-index: 10;">
+        <p id="nodeInfo"></p>
+    </div>
     <div class="options">
         <form>
             <div class="form-group">
@@ -33,7 +39,7 @@
                 </select>                
             </div>
             <button type="button" id="generate" class="button btn-block">New Intervention</button>
-            <div id="container"></div>  <!-- Ensure this div exists for dynamic interventions -->
+            <div id="container"></div>  
         </form>
     </div>
     
@@ -49,10 +55,7 @@
             var container = document.getElementById('mynetwork');
             var data = {{ graph_data|tojson }};
             var pagerank_scores = {{ pagerank_scores|tojson }};
-
-            console.log(data);  // Debugging print
             
-            //the graph 
             var options = {
                 "nodes": {
                     "shape": 'dot',
@@ -82,32 +85,92 @@
                 }
             };
             var network = new vis.Network(container, data, options);
-             // Release the fixed positions after a brief delay
-             setTimeout(function() {
-                data.nodes.forEach(function(node) {
-                    node.fixed = false;
-                });
-                network.setData(data);
-            }, 1000);  // Adjust the delay as needed
-            var i = 1;
-            var interventions = [];
-            var filtered_data = {
-                "nodes": [],
-                "edges": []
-            };
-            $('#generate').click(function () {
-                var values = {{ graph_data.nodes|tojson }};
-                var containerDiv = $('<div>').addClass('intervention').prop('id', 'intervention' + i);
 
-                var select = $('<select>').prop('id', 'intervene' + i.toString())
-                                          .addClass('nodes intervene form-control mb-2')
-                                          .prop('name', 'intervene')
-                                          .change(function() {
+            network.on("click", function(event) {
+            var edgePopup = document.getElementById('edgePopup');
+            var edgeInfo = document.getElementById('edgeInfo');
+            var nodePopup = document.getElementById('nodePopup');
+            var nodeInfo = document.getElementById('nodeInfo');
+    
+            edgePopup.style.display = 'none';
+            nodePopup.style.display = 'none';
+
+            if (event.edges.length > 0) {
+                var clickedEdgeId = event.edges[0];
+                var clickedEdge = data.edges.find(edge => edge.id === clickedEdgeId);
+        
+                if (clickedEdge) {
+                    edgeInfo.innerHTML = `
+                    <strong>Edge Information</strong><br>
+                    From: ${clickedEdge.from} <br>
+                    To: ${clickedEdge.to} <br>
+                    Weight: ${clickedEdge.width || 'N/A'}
+                    `;
+
+                    edgePopup.style.left = event.pointer.DOM.x + 'px';
+                    edgePopup.style.top = event.pointer.DOM.y + 'px';
+                    edgePopup.style.display = 'block';
+                }
+            }
+    
+            if (event.nodes.length > 0) {
+                var clickedNodeId = event.nodes[0];
+                var pagerankscore = pagerank_scores[clickedNodeId];
+                var connectedEdges = data.edges.filter(edge => edge.from === clickedNodeId || edge.to === clickedNodeId);   
+                var infoContent = `<strong>Node ${clickedNodeId}'s pagerank score:</strong><br> ${pagerankscore}<br><strong>Connected Nodes for Node ${clickedNodeId}</strong><br>`;
+                connectedEdges.forEach(edge => {
+                    var targetNode = edge.from === clickedNodeId ? edge.to : edge.from;
+                    var direction = edge.from === clickedNodeId ? "Outgoing" : "Incoming";
+                    infoContent += `
+                    Node: ${targetNode} <br>
+                    Direction: ${direction} <br>
+                    Weight: ${edge.width || 'N/A'} <br><br>
+                    `;
+                });
+
+                nodeInfo.innerHTML = infoContent;
+                nodePopup.style.left = event.pointer.DOM.x + 'px';
+                nodePopup.style.top = event.pointer.DOM.y + 'px';
+                nodePopup.style.display = 'block';
+            }
+        });
+
+        network.on("click", function(event) {
+            if (event.edges.length === 0) {
+                document.getElementById('edgePopup').style.display = 'none';
+            }
+            if (event.nodes.length === 0) {
+                document.getElementById('nodePopup').style.display = 'none';
+            }
+        });
+        
+        setTimeout(function() {
+            data.nodes.forEach(function(node) {
+                node.fixed = false;
+            });
+            network.setData(data);
+        }, 1000);  // Adjust the delay as needed
+        
+        var i = 1;
+        var interventions = [];
+        var filtered_data = {
+            "nodes": [],
+            "edges": []
+        };
+
+        $('#generate').click(function () {
+            var values = {{ graph_data.nodes|tojson }};
+            var containerDiv = $('<div>').addClass('intervention').prop('id', 'intervention' + i);
+
+            var select = $('<select>').prop('id', 'intervene' + i.toString())
+                                      .addClass('nodes intervene form-control mb-2')
+                                      .prop('name', 'intervene')
+                                      .change(function() {
                                           var node = $(this).val(); 
                                           interventions.push({"node": node, "value": 0});
-                                          });
+                                      });
 
-                var range = $('<input>').prop('id', 'policy' + i)
+            var range = $('<input>').prop('id', 'policy' + i)
                                         .addClass('slider policy form-control-range mb-2')
                                         .prop('type', 'range')
                                         .prop('min', '0')
@@ -157,14 +220,13 @@
                                         }
                                         });
 
-                var valueDisplay = $('<span>').prop('id', 'valueDisplay' + i)  // Give a unique ID to the value display span
+                var valueDisplay = $('<span>').prop('id', 'valueDisplay' + i)  
                                               .addClass('slider-value')
-                                              .text('0');  // Set the initial display value to 0
+                                              .text('0');  
 
-                // Event listener to update the value display when the slider value changes
                 range.on('input', function() {
                     var currentValue = $(this).val();
-                    valueDisplay.text(currentValue);  // Update the text of the span with the current slider value
+                    valueDisplay.text(currentValue);  
                 });
 
                 $(values).each(function () {
@@ -214,7 +276,6 @@
                                                         }else {
                                                             network.setData(data);
                                                         }
-                                                // Use the graphData to set the network's data
                                                 
                                                 }
                                                 });
@@ -232,7 +293,6 @@
                 // Remove the existing generate button (if any)
                     $('#globalSaveButton').remove();
 
-                    // Recreate and append the generate button at the bottom
                     var saveButton = $('<button>').prop('id', 'globalSaveButton')  // Unique ID for global button
                                       .addClass('btn btn-success mb-2')
                                       .text('Save')
