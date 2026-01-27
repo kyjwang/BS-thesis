@@ -1,7 +1,7 @@
 # InterVision
 
 ## Overview
-InterVision is an interactive visualization tool designed to support collaborative policymaking. It is based on ranking-algorithm simulations of complex systems and is intended for educational use, exploratory analysis, and supervised student projects.
+InterVision is an interactive visualization tool designed to support collaborative policymaking. It is based on ranking-algorithm simulations of complex systems.
 
 ## Citation
 If you use this code, please cite it using the DOI below:
