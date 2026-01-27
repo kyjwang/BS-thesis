@@ -4,9 +4,7 @@
 InterVision is an interactive visualization tool designed to support collaborative policymaking. It is based on ranking-algorithm simulations of complex systems.
 
 ## Citation
-If you use this code, please cite it using the DOI below:
-
-[![DOI](https://zenodo.org/badge/794991488.svg)](https://doi.org/10.5281/zenodo.14722019)
+If you use this code, please cite it using the DOI below: [![DOI](https://zenodo.org/badge/794991488.svg)](https://doi.org/10.5281/zenodo.14722019)
 
 ## Project Roles and Contributions
 - **Preliminary idea and prototype development:** Arsineh Boodaghian Asl  
